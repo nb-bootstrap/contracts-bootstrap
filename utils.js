@@ -5,23 +5,33 @@ const BNB_PRICE = 213;
 const GAS_GROUP_SUM = {};
 
 const CONTEXT = {};
+CONTEXT.logs = {
+    success: function () {
+        const [mg, ...args] = arguments;
+        console.log(`\u001b[1;32m${mg}\u001b[0m`, ...args);
+    },
+    error: function () {
+        const [mg, ...args] = arguments;
+        console.log(`\u001b[1;31m${mg}\u001b[0m`, ...args);
+    },
+    warn: function () {
+        const [mg, ...args] = arguments;
+        console.log(`\u001b[1;33m${mg}\u001b[0m`, ...args);
+    },
+};
 const newContract = async (name, args = []) => {
     args = Array.isArray(args) ? args : [args];
     const Contract = await ethers.getContractFactory(name);
     const ct = await Contract.deploy(...args);
-    await listenGasUsed(() => ct.deployed(), `Deployed ${name}`, "Deployed");
-    console.log("%s contract was deployed.", name);
+    const contract = await listenGasUsed(() => ct.deployed(), `Deployed ${name}`, "Deployed");
+    CONTEXT.logs.success("%s[%s] contract was deployed.", name, contract.address);
     return ct;
 };
 
 const initConstract = async () => {
     // @ts-ignore
-    const [owner, addr1, addr2, addr3, addr4] = await ethers.getSigners();
-    CONTEXT.addr1 = addr1;
-    CONTEXT.addr2 = addr2;
-    CONTEXT.owner = owner;
-    CONTEXT.addr3 = addr3;
-    CONTEXT.addr4 = addr4;
+    const [deployer] = await ethers.getSigners();
+    CONTEXT.owner = deployer;
 };
 
 const listenGasUsed = async (callback, message, groupName = "DEFAULT") => {
