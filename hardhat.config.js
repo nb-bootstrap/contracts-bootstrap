@@ -8,8 +8,19 @@ require("@nomicfoundation/hardhat-chai-matchers");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 const { bsc, mainnet, bnbtest, rinkeby, development } = require("./.secrets.json");
+task("run").addFlag("reset", "Republish all contract").addOptionalParam("from", "Republish contract from index");
+// add reset and from
+const args = process.argv;
+if (args.includes("--reset")) {
+    process.env.reset = 1;
+}
+let index;
+if ((index = args.indexOf("--from")) !== -1) {
+    if (args.length > index + 1 && /[0-9]/.test(args[index + 1])) {
+        process.env.from = args[index + 1];
+    }
+}
 
-task("run").addOptionalParam("reset", "Republish all contract", "0").addOptionalParam("from", "Republish contract from index", "-1");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 // task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {

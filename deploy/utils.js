@@ -28,8 +28,18 @@ const newContract = async (name, args = []) => {
     return ct;
 };
 
-const initConstract = async () => {
-    // @ts-ignore
+/**
+ * 通过地址初始化一个已经存在的合约
+ * @param {*} name 合约名称
+ * @param {*} address 地址
+ * @returns
+ */
+const newContractByAddress = async (name, address) => {
+    const Contract = await ethers.getContractFactory(name);
+    return await Contract.attach(address);
+};
+
+const initConfig = async () => {
     const [deployer] = await ethers.getSigners();
     CONTEXT.owner = deployer;
 };
@@ -58,4 +68,4 @@ const gasUsedAnalyze = () => {
     }
 };
 
-module.exports = { newContract, initConstract, CONTEXT, listenGasUsed, gasUsedAnalyze };
+module.exports = { newContractByAddress, newContract, initConfig, CONTEXT, listenGasUsed, gasUsedAnalyze };
