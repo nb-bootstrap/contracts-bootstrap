@@ -1,7 +1,5 @@
 const { web3 } = require("@openzeppelin/test-environment");
 const _ = require("lodash");
-const GAS_PRICE = web3.utils.toWei("5", "Gwei");
-const BNB_PRICE = 213;
 const GAS_GROUP_SUM = {};
 
 const CONTEXT = {};
@@ -24,7 +22,7 @@ const newContract = async (name, args = []) => {
     const Contract = await ethers.getContractFactory(name);
     const ct = await Contract.deploy(...args);
     const contract = await listenGasUsed(() => ct.deployed(), `Deployed ${name}`, "Deployed");
-    CONTEXT.logs.success("%s[%s] contract was deployed.", name, contract.address);
+    CONTEXT.logs.success("[%s][%s] contract was deployed.", name, contract.address);
     return ct;
 };
 
@@ -49,22 +47,27 @@ const listenGasUsed = async (callback, message, groupName = "DEFAULT") => {
     if (_.isFunction(log.wait)) {
         log = await log.wait();
     }
+    const gasPrice = !log.gasPrice ? log.deployTransaction.gasPrice : log.gasPrice;
     const gasLimit = log.gasUsed ? log.gasUsed : log.deployTransaction.gasLimit;
-    const usd = web3.utils.toBN(GAS_PRICE).mul(web3.utils.toBN(gasLimit));
-    console.log("%s used gas about %s,%s $BNB,%s $BUSD", message, gasLimit.toNumber(), web3.utils.fromWei(usd, "ether"), web3.utils.fromWei(usd.mul(web3.utils.toBN(BNB_PRICE)), "ether"));
+    const usd = web3.utils.toBN(gasPrice).mul(web3.utils.toBN(gasLimit));
+    console.log("%s used gas  %s wei, %s Ether,about %s $USD", message, gasLimit.toNumber(), web3.utils.fromWei(usd, "ether"), web3.utils.fromWei(usd.mul(web3.utils.toBN(CONTEXT.ethPrice)), "ether"));
     if (GAS_GROUP_SUM[groupName] === undefined) {
-        GAS_GROUP_SUM[groupName] = 0;
+        GAS_GROUP_SUM[groupName] = {
+            gasLimit: 0,
+            amount: 0,
+        };
     }
-    GAS_GROUP_SUM[groupName] += gasLimit.toNumber();
+    GAS_GROUP_SUM[groupName].gasLimit += gasLimit.toNumber();
+    GAS_GROUP_SUM[groupName].amount += usd.toNumber();
     return log;
 };
 
 const gasUsedAnalyze = () => {
     console.log("---------------Gas Used Analyze.");
     for (let p in GAS_GROUP_SUM) {
-        let gasLimit = GAS_GROUP_SUM[p];
-        const usd = web3.utils.toBN(GAS_PRICE).mul(web3.utils.toBN(gasLimit));
-        console.log("Gas Used Analyze[%s]: used gas about %s,%s $BNB,%s $BUSD", p, gasLimit, web3.utils.fromWei(usd, "ether"), web3.utils.fromWei(usd.mul(web3.utils.toBN(BNB_PRICE)), "ether"));
+        let gas = GAS_GROUP_SUM[p];
+        const usd = web3.utils.toBN(gas.amount);
+        console.log("Gas Used Analyze[%s]: used gas %s wei and %s Ether, about %s $USD", p, gas.gasLimit, web3.utils.fromWei(usd, "ether"), web3.utils.fromWei(usd.mul(web3.utils.toBN(CONTEXT.ethPrice)), "ether"));
     }
 };
 

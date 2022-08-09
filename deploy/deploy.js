@@ -3,14 +3,14 @@ const path = require("path");
 const fs = require("fs");
 const networks = require("../hardhat.config").networks;
 const addressList = require("./address.json");
-const { initConfig, newContract, CONTEXT, newContractByAddress } = require("./utils");
+const { initConfig, newContract, CONTEXT, newContractByAddress, gasUsedAnalyze } = require("./utils");
 const _ = require("lodash");
 const dir = path.join(__dirname, "../", "scripts");
-
+// get network
+const network = networks[process.env.HARDHAT_NETWORK];
+CONTEXT.ethPrice = network.ethPrice ? network.ethPrice : 1000;
 async function main() {
     CONTEXT.contractAddressLists = addressList;
-    // get network
-    const network = networks[process.env.HARDHAT_NETWORK];
     const reset = process.env.reset == 1;
     let from = process.env.from ? parseInt(process.env.from) : -1;
     from = reset === true ? 0 : from;
@@ -36,6 +36,7 @@ async function main() {
     for (let i = 0; i < fileList.length; i++) {
         await migrateIt(__dirPath, fileList[i], from);
     }
+    gasUsedAnalyze();
 }
 
 const migrateIt = async (fileDir, fileName, from) => {
@@ -43,9 +44,9 @@ const migrateIt = async (fileDir, fileName, from) => {
     if (from <= index) {
         await require(path.join(fileDir, fileName))(CONTEXT);
         CONTEXT.logs.success("Execute file %s successfully.", fileName);
-        CONTEXT.logs.success("Start saving and perform step %s.", index);
+        console.log("Start saving and perform step %s.", index);
         await CONTEXT.migration.setCompleted(index);
-        CONTEXT.logs.success("Save step %s success", index);
+        console.log("Save step %s success", index);
     } else {
         console.log("Skiped %s file deployment", fileName);
     }
@@ -55,7 +56,6 @@ const deployContract = async (contractName, args = [], name = "") => {
     const contract = await newContract(contractName, args);
     CONTEXT.contracts[_.isEmpty(name) ? contractName : name] = contract;
     CONTEXT.contractAddressLists[_.isEmpty(name) ? contractName : name] = contract.address;
-    CONTEXT.logs.success("Deployed %s[%s] contract is successed", contractName, contract.address);
     // 保存
     fs.writeFileSync(path.join(__dirname, "address.json"), JSON.stringify(CONTEXT.contractAddressLists));
     return contract;
