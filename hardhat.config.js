@@ -8,14 +8,14 @@ require("@nomicfoundation/hardhat-chai-matchers");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 const { bsc, mainnet, bnbtest, rinkeby, development } = require("./.secrets.json");
-task("run").addFlag("reset", "Republish all contract").addOptionalParam("from", "Republish contract from index");
+task("run").addFlag("reset", "Republish all contract").addOptionalParam("f", "Republish contract from index");
 // add reset and from
 const args = process.argv;
 if (args.includes("--reset")) {
     process.env.reset = 1;
 }
 let index;
-if ((index = args.indexOf("--from")) !== -1) {
+if ((index = args.indexOf("--f")) !== -1) {
     if (args.length > index + 1 && /[0-9]/.test(args[index + 1])) {
         process.env.from = args[index + 1];
     }
