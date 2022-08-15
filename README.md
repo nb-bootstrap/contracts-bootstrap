@@ -26,9 +26,31 @@ npx hardhat test test/xxx.test.js
 ```
 
 ## 部署合约
+
+### 1、部署命令
 ```
 npx hardhat run deploy/deploy.js --network localhost --reset --f 11
 
 ```
 * reset  从0开始重新部署
 * f 从特定序号开始重新部署
+
+### 2、部署代码说明
+
+> 部署的代码放在 **scripts** 目录，使用数字开头，数字决定了部署顺序，具体见样例。
+
+
+### 3、部署代码结构
+
+```
+module.exports = async ({ deployer, initAt }) => {
+    // 部署合约
+    await deployer("ContactName", xxx, [arg1, arg2]);
+    // 获取已经调用deployer后的合约
+    await initAt("ContactName");
+    // 从地址初始化合约
+    await initAt("ContactName", "0x.............");
+};
+
+
+```

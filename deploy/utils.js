@@ -1,4 +1,5 @@
 const { web3 } = require("@openzeppelin/test-environment");
+const { ethers } = require("ethers");
 const _ = require("lodash");
 const GAS_GROUP_SUM = {};
 

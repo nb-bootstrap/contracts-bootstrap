@@ -5,6 +5,7 @@ const networks = require("../hardhat.config").networks;
 const addressList = require("./address.json");
 const { initConfig, newContract, CONTEXT, newContractByAddress, gasUsedAnalyze } = require("./utils");
 const _ = require("lodash");
+const { ethers } = require("ethers");
 const dir = path.join(__dirname, "../", "scripts");
 // get network
 const network = networks[process.env.HARDHAT_NETWORK];
@@ -17,8 +18,8 @@ async function main() {
     // network is exsits.
     expect(network).to.not.undefined;
     CONTEXT.contracts = {};
-    CONTEXT.deploy = deployContract;
-    CONTEXT.get = newContractByAddress;
+    CONTEXT.deployer = deployContract;
+    CONTEXT.initAt = initContract;
     await initConfig();
     // 初始化 migration
     if (from === 0 || !CONTEXT.contractAddressLists.Migrations) {
@@ -61,8 +62,9 @@ const deployContract = async (contractName, args = [], name = "") => {
     return contract;
 };
 
-const initContract = async (contractName) => {
-    return await newContractByAddress(contractName, CONTEXT.contractAddressLists[contractName]);
+const initContract = async (contractName, address) => {
+    const address = ethers.utils.isAddress(address) ? address : CONTEXT.contractAddressLists[contractName];
+    return await newContractByAddress(contractName, address);
 };
 main().catch((error) => {
     console.error(error);
