@@ -8,7 +8,7 @@ require("@nomicfoundation/hardhat-chai-matchers");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 const { bsc, mainnet, bnbtest, rinkeby, development } = require("./.secrets.json");
-task("run").addFlag("reset", "Republish all contract").addOptionalParam("f", "Republish contract from index");
+task("run").addFlag("reset", "重新部署所有合约").addOptionalParam("dir", "合约目录地址").addOptionalParam("f", "从特定序号开始重新执行合约");
 // add reset and from
 const args = process.argv;
 if (args.includes("--reset")) {
@@ -20,7 +20,6 @@ if ((index = args.indexOf("--f")) !== -1) {
         process.env.from = args[index + 1];
     }
 }
-
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 // task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -51,6 +50,7 @@ module.exports = {
             gasPrice: 3000000000,
             timeout: 100000,
             ethPrice: 1800,
+            deployDir: "",
         },
         bnbtest: {
             url: `https://data-seed-prebsc-1-s1.binance.org:8545`,

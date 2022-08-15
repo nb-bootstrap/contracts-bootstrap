@@ -54,3 +54,19 @@ module.exports = async ({ deploy, initAt }) => {
 
 
 ```
+
+### 4、部署网络隔离
+
+> 如果有不同网络不同部署代码的需求，可以通过此配置来处理。
+> 在 **hardhat.config.js** 的 networks 节点添加 deployDir属性，相对于 **scripts** 目录
+
+```
+        localhost: {
+            url: `http://127.0.0.1:8545/`,
+            accounts: [development],
+            gasPrice: 3000000000,
+            timeout: 100000,
+            ethPrice: 1800,
+            deployDir: "rinkeby",
+        },
+```
