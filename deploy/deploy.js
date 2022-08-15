@@ -18,7 +18,7 @@ async function main() {
     // network is exsits.
     expect(network).to.not.undefined;
     CONTEXT.contracts = {};
-    CONTEXT.deployer = deployContract;
+    CONTEXT.deploy = deployContract;
     CONTEXT.initAt = initContract;
     await initConfig();
     // 初始化 migration

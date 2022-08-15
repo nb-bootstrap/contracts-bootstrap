@@ -43,10 +43,10 @@ npx hardhat run deploy/deploy.js --network localhost --reset --f 11
 ### 3、部署代码结构
 
 ```
-module.exports = async ({ deployer, initAt }) => {
+module.exports = async ({ deploy, initAt }) => {
     // 部署合约
-    await deployer("ContactName", xxx, [arg1, arg2]);
-    // 获取已经调用deployer后的合约
+    await deploy("ContactName", xxx, [arg1, arg2]);
+    // 获取已经调用deploy后的合约
     await initAt("ContactName");
     // 从地址初始化合约
     await initAt("ContactName", "0x.............");
